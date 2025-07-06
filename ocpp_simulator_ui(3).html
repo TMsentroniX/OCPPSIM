@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TmsentroniX OCPP 1.6 Chargebox Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background-color: #000;
+      color: #00ff00;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      line-height: 1.4;
+      background-image: radial-gradient(circle at center, #001100 0%, #000000 100%);
+    }
+
+    .wrapper {
+      padding: 10px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 60px;
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+      margin: 10px 0;
+      animation: flicker 2s infinite alternate;
+      letter-spacing: 4px;
+    }
+
+    .subTitle {
+      text-align: center;
+      font-size: 18px;
+      color: #00ff00aa;
+      margin-bottom: 5px;
+    }
+
+    .authorName {
+      text-align: center;
+      font-size: 14px;
+      color: #00ff00aa;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .actions, .console {
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 15px #00ff00;
+      padding: 20px;
+      border-radius: 10px;
+      flex: 1 1 400px;
+      min-width: 350px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select {
+      background-color: #000;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      width: 100%;
+      font-family: monospace;
+      border-radius: 5px;
+      box-shadow: inset 0 0 5px #00ff00;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    button {
+      background-color: #000;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      width: 100%;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    button:hover {
+      background-color: #00ff00;
+      color: #000;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    ul#console {
+      list-style-type: none;
+      padding: 0;
+      font-size: 14px;
+      font-family: monospace;
+      background-color: #001a00;
+      padding: 10px;
+      border-radius: 5px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .indicator {
+      display: inline-block;
+      width: 20px;
+      height: 10px;
+      margin-right: 5px;
+      border-radius: 3px;
+      box-shadow: 0 0 5px currentColor;
+    }
+
+    #red    { background-color: #ff0033; }
+    #green  { background-color: #00ff00; }
+    #blue   { background-color: #3399ff; }
+    #yellow { background-color: #ffff00; }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 0, 0.05),
+        rgba(0, 255, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @keyframes flicker {
+      0%   { opacity: 1; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+      50%  { opacity: 0.8; text-shadow: 0 0 5px #00ff00; }
+      100% { opacity: 1; text-shadow: 0 0 10px #00ff00, 0 0 30px #00ff00; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1 class="title">TmsentroniX</h1>
+    <p class="subTitle">OCPP 1.6 Chargebox Simulator - Enhanced Mode with Payment</p>
+    <p class="authorName">Developed by: M. Senthil Kumar</p>
+    <div class="container">
+      <div class="actions">
+        <label>Central Station</label>
+        <input id="CP" type="text" placeholder="Id Station" value="ws://localhost:3000/EVB-P20261797" />
+
+        <label>Tag</label>
+        <input id="TAG" type="text" placeholder="Tag" value="TM001S" />
+
+        <label>Connector uid</label>
+        <input id="CUID" type="text" placeholder="Connector uid" value="1" />
+        <input id="CUID2" type="text" placeholder="Connector uid 2" value="2" />
+
+        <h2>Actions</h2>
+        <button id="connect">Connect</button>
+        <button id="send">Authorize</button>
+        <button id="start">Start Transaction</button>
+        <button id="stop">Stop Transaction</button>
+        <button id="heartbeat">Heartbeat</button>
+
+        <label>Meter value (Total Energy Wh)</label>
+        <input id="metervalue" type="text" placeholder="Meter value" value="1" />
+
+        <label>Voltage (V)</label>
+        <input id="voltage" type="text" placeholder="Voltage" value="230" />
+
+        <label>Current (A)</label>
+        <input id="current" type="text" placeholder="Current" value="10" />
+
+        <label>Power (W)</label>
+        <input id="power" type="text" placeholder="Power" value="2300" />
+
+        <label>transactionId</label>
+        <input id="transactionId" type="text" placeholder="transactionId" value="1" />
+
+        <label>Connector Status</label>
+        <select name="ConnectorStatus" id="ConnectorStatus">
+          <option value="Available">Available</option>
+          <option value="Preparing">Preparing</option>
+          <option value="Charging">Charging</option>
+          <option value="SuspendedEV">SuspendedEV</option>
+          <option value="SuspendedEVSE">SuspendedEVSE</option>
+          <option value="Finishing">Finishing</option>
+          <option value="Reserved">Reserved</option>
+          <option value="Faulted">Faulted</option>
+          <option value="Offline">Offline</option>
+        </select>
+
+        <button id="mv">Send Meter Values</button>
+
+        <label>Meter Loop Config</label>
+        <input id="meterIncrement" type="text" placeholder="Increment (e.g. 1)" value="1" />
+        <input id="meterInterval" type="text" placeholder="Interval (ms)" value="1000" />
+        <input id="meterSendTimes" type="text" placeholder="Repeat Count" value="60" />
+
+        <button id="mvp">Send Meter Values Loop</button>
+        <button id="status">Status Notification</button>
+        <button id="data_transfer">Data Transfer</button>
+        <button id="clear_console">Clear Console</button>
+        <button id="reboot">Simulate Reset</button>
+        <button id="firmware_status">Firmware Status Notification</button>
+
+        <h2>💳 Payment Simulation</h2>
+        <label>Payment Mode</label>
+        <select id="paymentMode">
+          <option value="UPI">UPI</option>
+          <option value="CreditCard">Credit Card</option>
+          <option value="NFC">NFC</option>
+        </select>
+
+        <label>Amount (₹)</label>
+        <input id="paymentAmount" type="number" value="50" placeholder="Enter amount" />
+
+        <button id="simulate_payment">Simulate Payment</button>
+      </div>
+      <div class="console">
+        <div>
+          <span class="indicator" id="red">____</span>
+          <span class="indicator" id="green">____</span>
+          <span class="indicator" id="blue">____</span>
+          <span class="indicator" id="yellow">____</span>
+        </div>
+        <ul id="console"></ul>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
